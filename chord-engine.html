@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rhythm Deck | Chord Engine</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-900">
+
+<!-- HEADER (UNCHANGED FROM YOUR SITE) -->
+<header class="bg-black text-white p-4 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0 shadow-lg">
+  <div class="flex items-center space-x-3">
+    <img id="logo" src="logo-1-sm.jpg" alt="Rhythm Deck Logo" class="w-10 h-10 sm:w-12 sm:h-12 rounded-full">
+    <div>
+      <h1 class="text-xl sm:text-2xl font-bold tracking-wide">RHYTHM DECK</h1>
+      <p class="text-xs sm:text-sm text-gray-300">Unleash Your Beat</p>
+    </div>
+  </div>
+  <nav class="flex flex-col items-end gap-4 sm:gap-3">
+  <div class="flex flex-wrap justify-end items-center gap-2 sm:gap-3">
+    <a href="index.html" class="menu-btn home-btn">Home</a>
+    <a href="about.html" class="menu-btn about-btn">About</a>
+    <a href="benefits.html" class="menu-btn benefits-btn">Benefits</a>
+    <a href="pricing.html" class="menu-btn pricing-btn">Pricing</a>
+    <a href="contact.html" class="menu-btn contact-btn">Contact</a>
+    <a href="login.html" class="bg-white text-black px-5 py-2 rounded-lg hover:bg-gray-200 text-base font-medium">Login</a>
+    <a href="signup.html" class="bg-green-500 text-white px-5 py-2 rounded-lg hover:bg-green-400 text-base font-medium">Sign Up</a>
+    <div class="relative ml-2">
+      <div id="featuresBadge" class="features-badge">Rhythm Deck Features ▼</div>
+      <div id="dropdownMenu" class="dropdown-menu">
+        <div class="dropdown-item" onClick="document.getElementById('free-vs-pro-section').scrollIntoView({behavior: 'smooth'});">FREE vs PRO</div>
+        <div class="dropdown-item" onClick="document.getElementById('platinum-pro-section').scrollIntoView({behavior: 'smooth'});">PLATINUM PRO</div>
+        <div class="dropdown-item" onClick="document.getElementById('producers-distributors-section').scrollIntoView({behavior: 'smooth'});">PRODUCERS, DISTRIBUTORS, PUBLISHERS & SUPERVISORS</div>
+        <div class="dropdown-item" onClick="document.getElementById('core-features-section').scrollIntoView({behavior: 'smooth'});">CORE FEATURES</div>
+        <div class="dropdown-item" onClick="document.getElementById('rhythm-vision-comparison-section').scrollIntoView({behavior: 'smooth'});">RHYTHM VISION PLANS COMPARISON</div>
+        <div class="dropdown-item" onClick="document.getElementById('rhythm-wav-section').scrollIntoView({behavior: 'smooth'});">RHYTHM WAV PLAYLIST PLATFORM</div>
+        <div class="dropdown-item" onClick="window.open('/rhythm-deck-studio.html', '_blank');">
+          RHYTHM DECK STUDIO
+        </div>
+        <div class="dropdown-item" onClick="document.getElementById('instruction-manuals-section').scrollIntoView({behavior: 'smooth'});">INSTRUCTION MANUALS</div>
+        <div class="dropdown-item" onClick="document.getElementById('qa-section').scrollIntoView({behavior: 'smooth'});">Q&A</div>
+      </div>
+    </div>
+  </div>
+</nav>
+</header>
+<!-- HERO -->
+<section class="relative hero-height bg-cover bg-center flex items-center justify-center" style="background-image: url('banner-cropped.jpg');">
+  <div class="bg-black bg-opacity-60 p-6 sm:p-10 rounded-lg text-center max-w-4xl mx-auto">
+    <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">Where Music Meets Imagination</h2>
+    <p class="text-base sm:text-lg text-white max-w-xl mx-auto">
+      Rhythm Deck Chord Engine<br class="hidden sm:block">
+    </p>
+  </div>
+</section>
+
+<!-- CHORD ENGINE SECTION -->
+<section class="max-w-4xl mx-auto py-20 px-6 text-center">
+
+  <h2 class="text-4xl font-bold mb-6">Chord Detection Engine</h2>
+  <p class="mb-8 text-lg text-gray-700">
+    Upload an MP3 file and instantly detect the dominant chords.
+  </p>
+
+  <div class="bg-white shadow-xl rounded-2xl p-10">
+      <input id="fileInput" type="file" accept=".mp3"
+             class="mb-6 block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer bg-gray-50">
+
+      <button onclick="analyzeFile()"
+              class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-xl text-lg">
+          Analyze
+      </button>
+
+      <div id="result" class="mt-8 text-xl font-semibold text-gray-800"></div>
+  </div>
+
+</section>
+
+<!-- FOOTER (UNCHANGED FROM YOUR SITE) -->
+<footer class="bg-black text-white p-6 text-center text-sm">
+  <nav class="mb-4 space-x-4">
+    <a href="contact.html" class="hover:underline">Contact</a>
+    <a href="privacy.html" class="hover:underline">Privacy</a>
+    <a href="terms.html" class="hover:underline">Terms</a>
+  </nav>
+  <p>© 2026 Rhythm Deck Music. All rights reserved.</p>
+</footer>
+
+<script>
+function analyzeFile() {
+    const fileInput = document.getElementById("fileInput");
+    const resultDiv = document.getElementById("result");
+
+    if (!fileInput.files.length) {
+        alert("Please select an MP3 file.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+
+    resultDiv.innerHTML = "Analyzing...";
+
+    fetch("https://rhythm-deck-chord-engine.onrender.com/analyze", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            resultDiv.innerHTML = "Error: " + data.error;
+        } else {
+            resultDiv.innerHTML =
+                "Estimated Chords: " + data.estimated_chords.join(", ");
+        }
+    })
+    .catch(error => {
+        resultDiv.innerHTML = "Server error. Try again.";
+    });
+}
+</script>
+
+</body>
+</html>
