@@ -6,17 +6,19 @@ import tempfile
 import os
 
 app = Flask(__name__)
-
-# Allow Vercel frontend to talk to Render backend
 CORS(app)
+
 
 @app.route("/", methods=["GET"])
 def home():
     return jsonify({"status": "Rhythm Deck Chord Engine Running"}), 200
 
 
+# ===============================
+# FULL ENGINE (Original Quality)
+# ===============================
 @app.route("/analyze", methods=["POST"])
-def analyze():
+def analyze_full():
     if "file" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
 
@@ -26,7 +28,46 @@ def analyze():
         with tempfile.NamedTemporaryFile(delete=False) as temp:
             file.save(temp.name)
 
-            y, sr = librosa.load(temp.name)
+            y, sr = librosa.load(temp.name, mono=True)
+            chroma = librosa.feature.chroma_stft(y=y, sr=sr)
+            chroma_mean = np.mean(chroma, axis=1)
+
+        os.unlink(temp.name)
+
+        notes = ["C", "C#", "D", "D#", "E", "F",
+                 "F#", "G", "G#", "A", "A#", "B"]
+
+        top_notes = np.argsort(chroma_mean)[-3:]
+        chords = [notes[i] for i in top_notes]
+
+        return jsonify({"estimated_chords": chords})
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ==========================================
+# LIGHT MODE (Render Free Memory Safe Mode)
+# ==========================================
+@app.route("/analyze-lite", methods=["POST"])
+def analyze_lite():
+    if "file" not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    file = request.files["file"]
+
+    try:
+        with tempfile.NamedTemporaryFile(delete=False) as temp:
+            file.save(temp.name)
+
+            # MEMORY SAFE SETTINGS
+            y, sr = librosa.load(
+                temp.name,
+                sr=16000,      # Lower sample rate
+                mono=True,     # Force mono
+                duration=60    # Limit to first 60 seconds
+            )
+
             chroma = librosa.feature.chroma_stft(y=y, sr=sr)
             chroma_mean = np.mean(chroma, axis=1)
 
