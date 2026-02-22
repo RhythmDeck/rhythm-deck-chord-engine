@@ -6,7 +6,21 @@ import tempfile
 import os
 
 app = Flask(__name__)
-CORS(app)
+
+# Strong CORS configuration (handles preflight properly)
+CORS(
+    app,
+    resources={r"/*": {"origins": "*"}},
+    methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type"],
+)
+
+@app.after_request
+def after_request(response):
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type")
+    response.headers.add("Access-Control-Allow-Methods", "GET,POST,OPTIONS")
+    return response
 
 
 @app.route("/", methods=["GET"])
@@ -17,8 +31,12 @@ def home():
 # ===============================
 # FULL ENGINE (Original Quality)
 # ===============================
-@app.route("/analyze", methods=["POST"])
+@app.route("/analyze", methods=["POST", "OPTIONS"])
 def analyze_full():
+
+    if request.method == "OPTIONS":
+        return jsonify({"status": "ok"}), 200
+
     if "file" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
 
@@ -49,8 +67,12 @@ def analyze_full():
 # ==========================================
 # LIGHT MODE (Render Free Memory Safe Mode)
 # ==========================================
-@app.route("/analyze-lite", methods=["POST"])
+@app.route("/analyze-lite", methods=["POST", "OPTIONS"])
 def analyze_lite():
+
+    if request.method == "OPTIONS":
+        return jsonify({"status": "ok"}), 200
+
     if "file" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
 
